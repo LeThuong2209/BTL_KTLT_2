@@ -160,13 +160,15 @@ Unit* Infantry :: clone() const {
 
 // task 3.4
 Army::Army() : unitList(nullptr), battleField(nullptr), name(""), LF(0), EXP(0) {}
-Army::Army(Unit **unitArray, int size, string name, BattleField* battlefield)
-    : battleField(battlefield), name(name), unitList(new UnitList(size)), LF(0), EXP(0) {
-    for (int i = 0; i < size; ++i) {
-        Unit* clonedUnit = unitArray[i]->clone();
-        this->unitList->insert(clonedUnit);
+Army::Army(Unit **unitArray, int size, string name, BattleField* battlefield){
+    this->battleField = battleField;
+    this->name = name;
+    this->unitList = new UnitList(size);
+    for (int i = 0; i < size; i++){
+        Unit* unitClone = unitArray[i]->clone();
+        unitList->insert(unitClone);
     }
-    make(); // Thường nên gọi make() sau khi unitList đã được khởi tạo đầy đủ
+    make();
 }
 void Army :: make(){
     Node* tmp = unitList->get_head();
@@ -359,7 +361,6 @@ void LiberationArmy :: fight(Army *enemy, bool defense) {
                 tmp = tmp->next;
             }
             this->make();
-            
         }
     }
     else if (defense == true){
@@ -657,7 +658,7 @@ string UnitList::str() const{
     result += to_string(cnt_Ve);
     result += ";count_infantry=";
     result += to_string(cnt_In);
-    if (cnt_In == 0 && cnt_Ve == 0) return result + ']';
+    if (cnt_In == 0 && cnt_Ve == 0) return result + "]";
     result += ";";
     Node* tmp1 = head;
     while (tmp1 != NULL){
@@ -943,61 +944,54 @@ string SpecialZone :: str() const{
     return "SpecialZone";
 }
 // task 3.8
-BattleField::BattleField(int n_rows, int n_cols, vector<Position *> arrayForest,
-                       vector<Position *> arrayRiver, vector<Position *> arrayFortification,
-                       vector<Position *> arrayUrban, vector<Position *> arraySpecialZone) {
-    this->n_cols = n_cols;
-    this->n_rows = n_rows;
-    terrain = new TerrainElement**[n_rows];
-    for (int i = 0; i < n_rows; i++) {
-        terrain[i] = new TerrainElement*[n_cols];
-        for (int j = 0; j < n_cols; j++) {
-            terrain[i][j] = nullptr;  // Initialize to nullptr
+BattleField :: BattleField(int n_rows, int n_cols, vector<Position *> arrayForest,
+    vector<Position *> arrayRiver, vector<Position *> arrayFortification,
+    vector<Position *> arrayUrban, vector<Position *> arraySpecialZone){
+        this->n_cols = n_cols;
+        this->n_rows = n_rows;
+        terrain = new TerrainElement**[n_rows];
+        for (int i = 0; i < n_rows; i++){
+            terrain[i] = new TerrainElement*[n_cols];
+        }
+        for (Position* x : arrayForest){
+            int r = x->getRow();
+            int c = x->getCol();
+            terrain[r][c] = new Mountain();
+        }
+        for (Position* x : arrayRiver){
+            int r = x->getRow();
+            int c = x->getCol();
+            terrain[r][c] = new River();
+        }
+        for (Position* x : arrayFortification){
+            int r = x->getRow();
+            int c = x->getCol();
+            terrain[r][c] = new Fortification();
+        }
+        for (Position* x : arrayUrban){
+            int r = x->getRow();
+            int c = x->getCol();
+            terrain[r][c] = new Urban();
+        }
+        for (Position* x : arraySpecialZone){
+            int r = x->getRow();
+            int c = x->getCol();
+            terrain[r][c] = new SpecialZone();
         }
     }
-
-    for (Position* x : arrayForest) {
-        int r = x->getRow();
-        int c = x->getCol();
-        terrain[r][c] = new Mountain();
-    }
-    for (Position* x : arrayRiver) {
-        int r = x->getRow();
-        int c = x->getCol();
-        terrain[r][c] = new River();
-    }
-    for (Position* x : arrayFortification) {
-        int r = x->getRow();
-        int c = x->getCol();
-        terrain[r][c] = new Fortification();
-    }
-    for (Position* x : arrayUrban) {
-        int r = x->getRow();
-        int c = x->getCol();
-        terrain[r][c] = new Urban();
-    }
-    for (Position* x : arraySpecialZone) {
-        int r = x->getRow();
-        int c = x->getCol();
-        terrain[r][c] = new SpecialZone();
-    }
-}
-
-BattleField::~BattleField() {
-    for (int i = 0; i < n_rows; i++) {
-        for (int j = 0; j < n_cols; j++) {
-            if (terrain[i][j] != nullptr) { // Check for nullptr
-                delete terrain[i][j];
-            }
+BattleField :: ~BattleField(){
+    for (int i = 0; i < n_rows; i++){
+        for (int j = 0; j < n_cols; j++){
+            delete terrain[i][j];
         }
         delete[] terrain[i];
     }
     delete[] terrain;
 }
-
-string BattleField::str() {  // IMPLEMENTATION HERE!
+string BattleField :: str(){
     return "BattleField[n_rows=" + to_string(n_rows) + ",n_cols=" + to_string(n_cols) + "]";
 }
+
 //task 3.9
 Configuration :: Configuration(const string &filepath){
     ifstream in(filepath);
