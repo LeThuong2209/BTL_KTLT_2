@@ -9,7 +9,6 @@ Unit :: Unit(int quantity, int weight, Position pos){
 }   
 
 Unit :: ~Unit(){}
-
 Position Unit :: getCurrentPosition() const{
     return pos;
 }
@@ -1217,13 +1216,9 @@ void HCMCampaign :: run() {
             liberationArmy->fight(arvn, false); // Call LA's fight method
             arvn->fight(liberationArmy, true); // Call LA's fight method
 
-            arvn->set_EXP(0);
-            arvn->set_LF(0);
-
             liberationArmy->make();
             arvn->make();
-
-            // Check for victory after the round (only one army's phase in this mode).
+  
             if (liberationArmy->get_unitList()->size_of_list() == 0 || arvn->get_unitList()->size_of_list() == 0) {
                 std::cout << "An army was defeated." << std::endl;
             }
@@ -1232,9 +1227,6 @@ void HCMCampaign :: run() {
             std::cout << "ARVN phase..." << std::endl;
             arvn->fight(liberationArmy, false); // Call ARVN's fight method
             liberationArmy->fight(arvn, true); // Call LA's fight method
-
-            arvn->set_EXP(0);
-            arvn->set_LF(0);
 
             liberationArmy->make();
             arvn->make();
@@ -1248,6 +1240,7 @@ void HCMCampaign :: run() {
             std::cout << "Liberation Army counter-attack phase..." << std::endl;
             liberationArmy->fight(arvn, false); // Call LA's fight method for counter-attack
 
+            liberationArmy->make();
             arvn->make();
 
             if (liberationArmy->get_unitList()->size_of_list() == 0 || arvn->get_unitList()->size_of_list() == 0) {
