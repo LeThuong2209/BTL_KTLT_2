@@ -341,8 +341,8 @@ void LiberationArmy :: fight(Army *enemy, bool defense) {
                 this->unitList->insert(head1->data->clone());
                 head1 = head1->next;
             }
-            // enemy->set_EXP(0);
-            // enemy->set_LF(0);
+            enemy->set_EXP(0);
+            enemy->set_LF(0);
             // enemy->get_unitList()->set_head(nullptr);
             this->make();
         }
@@ -462,7 +462,14 @@ string LiberationArmy :: str() const{
 ARVN :: ARVN(Unit ** unitArray, int size, string name, BattleField *battleField) : Army(unitArray, size, name, battleField){}
 void ARVN :: fight(Army *enemy, bool defense){
     if (defense == false){
-        Node *head = unitList->get_head();
+        Node* head = new Node;
+        if (unitList) head = unitList->get_head();
+        else {
+            this->set_EXP(0);
+            this->set_LF(0);
+            this->get_unitList()->set_head(nullptr);
+            return;
+        }
         Node *prev = NULL;
         while (head != NULL){
             int x = head->data->get_quantity();
