@@ -1,6 +1,7 @@
 #include "hcmcampaign.h"
 
 // 3.1
+
 Unit :: Unit(int quantity, int weight, Position pos){
     this->quantity = quantity;
     this->weight = weight;
@@ -28,8 +29,8 @@ void Unit :: set_weight(int x){
 void Unit :: set_pos(Position pos){
     this->pos = pos;
 }
-// task 3.2
-Vehicle :: Vehicle(int quantity, int weight, const Position pos, VehicleType vehicleType) : Unit(quantity, weight, pos){
+// task 3.2 
+ Vehicle :: Vehicle(int quantity, int weight, const Position pos, VehicleType vehicleType) : Unit(quantity, weight, pos){
     this->vehicleType = vehicleType;
 } 
 int Vehicle :: getAttackScore(){
@@ -287,10 +288,7 @@ void LiberationArmy :: fight(Army *enemy, bool defense) {
         }
 
         if (sum1 > LF_enemy && sum2 > EXP_enemy){
-            // xoá khỏi danh sách
-            // xoá tổ hợp A
             delete_set(vehicle_list);
-            // xoá tổ hợp B
             delete_set(infantry_list);
             war = true;
             win = true;
@@ -1073,7 +1071,6 @@ Configuration :: Configuration(const string &filepath){
 Configuration :: ~Configuration(){
     
 
-
 }
 InfantryType Configuration :: string_to_enumI(string type){
     if (type == "SNIPER") return SNIPER;
@@ -1120,32 +1117,163 @@ string Configuration :: str() const{
     result += "liberationUnits=[" + chuoi2(liberationUnits) + "],ARVNUnits=[" + chuoi2(ARVNUnits) + "],";
     result += "eventCode=" + to_string(eventCode) + ']';
     return result;
-    // for (int i = 0; i < arrayForest.size(); i++){
-    //     result += arrayForest[i]->str() + ",";
-    // }
-    // for (int i = 0; i < (int)arrayRiver.size(); i++){
-    //     result += arrayRiver[i]->str() + ",";
-    // }
-    // for (int i = 0; i < (int)arrayFortification.size(); i++){
-    //     result += arrayFortification[i]->str() + ",";
-    // }
-    // for (int i = 0; i < (int)arrayUrban.size(); i++){
-    //     result += arrayUrban[i]->str() + ",";
-    // }
-    // for (int i = 0; i < (int)arraySpecialZone.size(); i++){
-    //     result += arraySpecialZone[i]->str() + ",";
-    // }
 }
 
 // task 3.10
-HCMCampaign :: HCMCampaign(const string &config_file_path){
-    // ifstream in(config_file_path);
-    // if (in.is_open()){
 
-    // }
+Unit** vectorToUnitArray(const std::vector<Unit*>& units) {
+    if (units.empty()) {
+        return nullptr;
+    }
+    Unit** unitArray = new Unit*[units.size()];
+    for (size_t i = 0; i < units.size(); ++i) {
+        unitArray[i] = units[i]; // Copy the pointer
+    }
+    return unitArray;
 }
-void HCMCampaign :: run(){}
-string HCMCampaign :: printResult(){return "";}
+
+// Helper function to remove units with quantity <= 0 or attackScore <= 5 from a UnitList
+// This needs to iterate through the list and handle node deletion correctly.
+// Assuming Position has public getRow() and getCol() methods if checking quantity.
+void cleanupDefeatedUnits(UnitList* unitList) {
+    if (!unitList || unitList->get_head() == nullptr) return;
+
+    Node* current = unitList->get_head();
+    Node* prev = nullptr;
+
+    while (current != nullptr) {
+        // Remove units if quantity is 0 or less, or if attackScore is 5 or less.
+        bool remove_unit = false;
+        if (current->data->get_quantity() <= 0) {
+            // std::cout << "  Removing unit (Qty <= 0): " << current->data->str() << std::endl;
+            remove_unit = true;
+        } else if (current->data->getAttackScore() <= 5) {
+             // std::cout << "  Removing unit (attackScore <= 5): " << current->data->str() << std::endl;
+             remove_unit = true;
+        }
+
+        if (remove_unit) {
+            Node* to_delete = current;
+            if (prev == nullptr) {
+                // Removing the head
+                unitList->set_head(current->next);
+                current = current->next;
+            } else {
+                prev->next = current->next;
+                current = current->next;
+            }
+            // Deleting the unit data and the node
+            delete to_delete->data; // Delete the Unit object
+            delete to_delete;      // Delete the Node object
+            // UnitList::size_of_list() should reflect this removal, either by recalculation or internal count update.
+        } else {
+            prev = current;
+            current = current->next;
+        }
+    }
+}
+HCMCampaign :: HCMCampaign(const string &config_file_path) {
+    config = new Configuration(config_file_path);
+    int num_rows = config->getNumRows();
+    int num_cols = config->getNumCols();
+    const std::vector<Position*>& arrayForest = config->getArrayForest();
+    const std::vector<Position*>& arrayRiver = config->getArrayRiver();
+    const std::vector<Position*>& arrayFortification = config->getArrayFortification();
+    const std::vector<Position*>& arrayUrban = config->getArrayUrban();
+    const std::vector<Position*>& arraySpecialZone = config->getArraySpecialZone(); // Note: missing semicolon on this line in the user's snippet
+
+    battleField = new BattleField(
+        num_rows, num_cols,
+        const_cast<std::vector<Position*>&>(arrayForest),
+        const_cast<std::vector<Position*>&>(arrayRiver),
+        const_cast<std::vector<Position*>&>(arrayFortification),
+        const_cast<std::vector<Position*>&>(arrayUrban),
+        const_cast<std::vector<Position*>&>(arraySpecialZone)
+    );
+    const std::vector<Unit*>& liberationUnitsVec = config->getLiberationUnits();
+    const std::vector<Unit*>& arvnUnitsVec = config->getARVNUnits();
+  
+   Unit** liberationUnitsArray = vectorToUnitArray(liberationUnitsVec);
+    int liberationSize = liberationUnitsVec.size();
+
+    Unit** arvnUnitsArray = vectorToUnitArray(arvnUnitsVec);
+    int arvnSize = arvnUnitsVec.size();
+
+
+
+   liberationArmy = new LiberationArmy(liberationUnitsArray, liberationSize, "Liberation Army", battleField);
+   arvn = new ARVN(arvnUnitsArray, arvnSize, "ARVN", battleField);
+
+    // Delete the temporary arrays created by vectorToUnitArray, as Armies should own the cloned units.
+    delete[] liberationUnitsArray;
+    delete[] arvnUnitsArray;
+}
+
+void HCMCampaign :: run() {
+    int eventCode = config->getEventCode();
+    std::cout << "Starting campaign simulation (Event Code: " << eventCode << ")..." << std::endl;
+        if (eventCode < 75) {
+            std::cout << "Liberation Army phase..." << std::endl;
+            liberationArmy->fight(arvn, false); // Call LA's fight method
+            arvn->fight(liberationArmy, true); // Call LA's fight method
+
+            arvn->set_EXP(0);
+            arvn->set_LF(0);
+
+            liberationArmy->make();
+            arvn->make();
+
+            // Check for victory after the round (only one army's phase in this mode).
+            if (liberationArmy->get_unitList()->size_of_list() == 0 || arvn->get_unitList()->size_of_list() == 0) {
+                std::cout << "An army was defeated." << std::endl;
+            }
+
+        } else { // eventCode >= 75
+            std::cout << "ARVN phase..." << std::endl;
+            arvn->fight(liberationArmy, false); // Call ARVN's fight method
+            liberationArmy->fight(arvn, true); // Call LA's fight method
+
+            arvn->set_EXP(0);
+            arvn->set_LF(0);
+
+            liberationArmy->make();
+            arvn->make();
+
+            // Check for victory after ARVN's phase before the counter-attack.
+            if (liberationArmy->get_unitList()->size_of_list() == 0 || arvn->get_unitList()->size_of_list() == 0) {
+                std::cout << "An army was defeated after ARVN's phase." << std::endl;
+            }
+
+            // Liberation Army counter-attacks immediately in the same round.
+            std::cout << "Liberation Army counter-attack phase..." << std::endl;
+            liberationArmy->fight(arvn, false); // Call LA's fight method for counter-attack
+
+            arvn->make();
+
+            if (liberationArmy->get_unitList()->size_of_list() == 0 || arvn->get_unitList()->size_of_list() == 0) {
+                std::cout << "An army was defeated." << std::endl;
+            }
+        }
+
+
+}
+string HCMCampaign :: printResult() {
+    int liberationLF = liberationArmy->get_LF();
+    int liberationEXP = liberationArmy->get_EXP();
+    int arvnLF = arvn->get_LF();
+    int arvnEXP = arvn->get_EXP();
+    string result = "LIBERATIONARMY[" + std::to_string(liberationLF) + "," + std::to_string(liberationEXP) + "]-ARVN[" + std::to_string(arvnLF) + "," + std::to_string(arvnEXP) + "]";
+
+
+    return result;
+}
+
+HCMCampaign::~HCMCampaign() {
+    delete config;
+    delete battleField;
+    delete liberationArmy;
+    delete arvn;
+}
 ////////////////////////////////////////////////
 /// END OF STUDENT'S ANSWER
 ////////////////////////////////////////////////

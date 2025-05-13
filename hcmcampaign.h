@@ -1,8 +1,7 @@
 /*
  * Ho Chi Minh City University of Technology
  * Faculty of Computer Science and Engineering
- * Initial code for Assignment 2
- * Programming Fundamentals Spring 2025
+ * Initial code for Assignment 2 Programming Fundamentals Spring 2025
  * Date: 02.02.2025
  */
 
@@ -251,13 +250,19 @@ private:
     // TODO
     TerrainElement ***terrain;
 public:
-    BattleField(int n_rows, int n_cols, vector<Position *> arrayForest,
-                vector<Position *> arrayRiver, vector<Position *> arrayFortification,
-                vector<Position *> arrayUrban, vector<Position *> arraySpecialZone);
+    BattleField(int n_rows, int n_cols, 
+                vector<Position *> arrayForest,
+                vector<Position *> arrayRiver, 
+                vector<Position *> arrayFortification,
+                vector<Position *> arrayUrban, 
+                vector<Position *> arraySpecialZone);
     ~BattleField();
     string str();
 };
 
+
+
+// working here
 class HCMCampaign
 {
 private:
@@ -268,9 +273,13 @@ private:
 
 public:
     HCMCampaign(const string &config_file_path);
+    virtual ~HCMCampaign();
     void run();
     string printResult();
+   
 };
+//
+
 
 class Configuration{
 private:
@@ -289,6 +298,22 @@ public:
     string str() const;
     InfantryType string_to_enumI(string type);
     VehicleType string_to_enumV(string type);
+
+    // Getter cho số dòng, số cột và mã sự kiện
+    int getNumRows() const { return num_rows; }
+    int getNumCols() const { return num_cols; }
+    int getEventCode() const { return eventCode; }
+
+    // Getter cho các khu vực đặc biệt
+    const vector<Position*>& getArrayForest() const { return arrayForest; }
+    const vector<Position*>& getArrayRiver() const { return arrayRiver; }
+    const vector<Position*>& getArrayFortification() const { return arrayFortification; }
+    const vector<Position*>& getArrayUrban() const { return arrayUrban; }
+    const vector<Position*>& getArraySpecialZone() const { return arraySpecialZone; }
+
+    // Getter cho các đơn vị
+    const vector<Unit*>& getLiberationUnits() const { return liberationUnits; }
+    const vector<Unit*>& getARVNUnits() const { return ARVNUnits; }
 };
 
 class Vehicle : public Unit
@@ -306,6 +331,8 @@ public:
     InfantryType getInfantryType() const override;
     Unit* clone() const override;
 };
+
+
 
 class Infantry : public Unit
 {
