@@ -1,5 +1,9 @@
 #include "hcmcampaign.h"
 
+////////////////////////////////////////////////////////////////////////
+/// STUDENT'S ANSWER BEGINS HERE
+////////////////////////////////////////////////////////////////////////
+
 // 3.1
 Unit :: Unit(int quantity, int weight, Position pos){
     this->quantity = quantity;
@@ -76,7 +80,7 @@ InfantryType Vehicle :: getInfantryType() const{
     throw std::logic_error("");
 }
 Unit* Vehicle::clone() const  {
-    return new Vehicle(quantity, weight, pos, vehicleType);
+    return new Vehicle(this->quantity, this->weight, this->pos, this->vehicleType);
 }
 
 // task 3.3
@@ -338,12 +342,13 @@ void LiberationArmy :: fight(Army *enemy, bool defense) {
             Node* head1 = enemy->get_unitList()->get_head();
             while (head1 != nullptr) {
                 //cout << head1->data->str() << endl;
-                this->unitList->insert(head1->data->clone());
+                Unit* unitClone = head1->data->clone();
+                this->unitList->insert(unitClone);
                 head1 = head1->next;
             }
             enemy->set_EXP(0);
             enemy->set_LF(0);
-            // enemy->get_unitList()->set_head(nullptr);
+            enemy->get_unitList()->set_head(nullptr);
             this->make();
         }
         else if (war == false){
@@ -371,6 +376,7 @@ void LiberationArmy :: fight(Army *enemy, bool defense) {
                 head->data->set_quantity(ceil(1.0 * x * 9 / 10));
                 head = head->next;
             }
+            this->make();
         }
         else if (LF < enemy->get_LF() && EXP < enemy->get_EXP()){
             Node *head = unitList->get_head();
@@ -379,6 +385,7 @@ void LiberationArmy :: fight(Army *enemy, bool defense) {
                 head->data->set_quantity(x);
                 head = head->next;
             }
+            this->make();
         }
     }
 }
@@ -462,14 +469,7 @@ string LiberationArmy :: str() const{
 ARVN :: ARVN(Unit ** unitArray, int size, string name, BattleField *battleField) : Army(unitArray, size, name, battleField){}
 void ARVN :: fight(Army *enemy, bool defense){
     if (defense == false){
-        Node* head = new Node;
-        if (unitList) head = unitList->get_head();
-        else {
-            this->set_EXP(0);
-            this->set_LF(0);
-            this->get_unitList()->set_head(nullptr);
-            return;
-        }
+        Node *head = unitList->get_head();
         Node *prev = NULL;
         while (head != NULL){
             int x = head->data->get_quantity();
@@ -519,6 +519,7 @@ void ARVN :: fight(Army *enemy, bool defense){
             }
             head = head->next;
         }
+        this->make();
     }
 }
 string ARVN :: str() const{
@@ -656,7 +657,7 @@ string UnitList::str() const{
     result += to_string(cnt_Ve);
     result += ";count_infantry=";
     result += to_string(cnt_In);
-    if (cnt_In == 0 && cnt_Ve == 0) return result += "]";
+    if (cnt_In == 0 && cnt_Ve == 0) return result + ']';
     result += ";";
     Node* tmp1 = head;
     while (tmp1 != NULL){
@@ -664,7 +665,7 @@ string UnitList::str() const{
         if (tmp1->next != NULL) result += ',';
         tmp1 = tmp1->next;
     }
-    return result;
+    return result + ']';
 }
 // void UnitList::deleteNode(Node *x){
 //     Node *tmp = head;
