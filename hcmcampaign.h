@@ -187,16 +187,19 @@ class TerrainElement
 {
 public:
     TerrainElement();
-    virtual ~TerrainElement();
+    ~TerrainElement();
     virtual void getEffect(Army *army) = 0;
     virtual Position get_pos() const = 0;
     virtual string str() const = 0;
 };
 
 class Road : public TerrainElement{
+private: 
+    Position pos;
 public: 
     void getEffect(Army *army) override;
     string str() const override;
+    Position get_pos() const override;
 };
 
 class Mountain : public TerrainElement{
@@ -256,6 +259,9 @@ public:
                 vector<Position *> arrayUrban, vector<Position *> arraySpecialZone);
     ~BattleField();
     string str();
+    int getRow();
+    int getCols();
+    TerrainElement*** getTerrain();
 };
 
 class HCMCampaign
@@ -289,6 +295,22 @@ public:
     string str() const;
     InfantryType string_to_enumI(string type);
     VehicleType string_to_enumV(string type);
+    // Getter cho số dòng, số cột và mã sự kiện
+    int getNumRows() const;
+    int getNumCols() const;
+    int getEventCode() const;
+
+    // Getter cho các khu vực đặc biệt
+    const vector<Position*>& getArrayForest() const;
+    const vector<Position*>& getArrayRiver() const;
+    const vector<Position*>& getArrayFortification() const;
+    const vector<Position*>& getArrayUrban() const;
+    const vector<Position*>& getArraySpecialZone() const;
+
+    // Getter cho các đơn vị
+    const vector<Unit*>& getLiberationUnits() const;
+    const vector<Unit*>& getARVNUnits() const;
+
 };
 
 class Vehicle : public Unit
@@ -298,7 +320,7 @@ private:
 
 public:
     Vehicle(int quantity, int weight, const Position pos, VehicleType vehicleType);
-    virtual int getAttackScore() override;
+    virtual int getAttackScore();
     string str() const override;
     bool isInfantry() const override;
     bool isVehicle() const override;
@@ -314,7 +336,7 @@ private:
 
 public:
     Infantry(int quantity, int weight, const Position pos, InfantryType infantryType);
-    int getAttackScore() override;
+    int getAttackScore();
     string str() const override;
     int sum_digit(int n);
     int getScore(int quantity, int weight);
