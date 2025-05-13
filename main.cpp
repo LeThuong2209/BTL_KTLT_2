@@ -7,7 +7,6 @@
 */
 
 //The library here is concretely set, students are not allowed to include any other libraries.
-
 #include "hcmcampaign.h"
 
 using namespace std;
@@ -20,6 +19,7 @@ void g_satc_01() {
 }
 void g_satc_02() {
     cout << "----- Sample Testcase 02 -----" << endl;
+    cout << endl;
     Vehicle tankOfLiber(20, 20, Position(1, 2), MORTAR); 
     Vehicle truckOfLiber(15, 10, Position(2, 2), TRUCK); // ATK = 5
     Infantry sniperOfLiber(10, 20, Position(1, 1), SNIPER); 
@@ -40,8 +40,10 @@ void g_satc_02() {
 
     LiberationArmy* liberationArmy = new LiberationArmy(unitArrayOfLiber, 3, "LiberationArmy", 0);
     cout << liberationArmy->str() << endl;
+    cout << endl;
     ARVN* arvn = new ARVN(unitArrayOfAr, 3, "ARVN", 0);
     cout << arvn->str() << endl;
+    cout << endl;
 
     Army* enemyLiber = arvn;
     liberationArmy->fight(enemyLiber, false); // LF = 44, EXP = 300
@@ -49,12 +51,15 @@ void g_satc_02() {
     arvn->fight(enemyAr, false);
 
     cout << "* After the fight" << endl;
-    Node* head = liberationArmy->get_unitList()->get_head();
+    cout << endl;
+    Node* head = arvn->get_unitList()->get_head();
     while (head){
         cout << head->data->str() << endl;;
         head = head->next;
     }
+    cout << endl;
     cout << liberationArmy->str() << endl;
+    cout << endl;
     cout << arvn->str() << endl;
 
     delete liberationArmy;

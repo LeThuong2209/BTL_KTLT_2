@@ -1,9 +1,5 @@
 #include "hcmcampaign.h"
 
-////////////////////////////////////////////////////////////////////////
-/// STUDENT'S ANSWER BEGINS HERE
-////////////////////////////////////////////////////////////////////////
-
 // 3.1
 Unit :: Unit(int quantity, int weight, Position pos){
     this->quantity = quantity;
@@ -155,19 +151,18 @@ VehicleType Infantry :: getVehicleType() const{
     throw std::logic_error("");
 }
 Unit* Infantry :: clone() const {
-    return new Infantry(quantity, weight, pos, infantryType);
+    return new Infantry(this->quantity, this->weight, this->pos, this->infantryType);
 }
 
 // task 3.4
-Army::Army(){}
-Army::Army(Unit **unitArray, int size, string name, BattleField* battlefield){
-    this->battleField = battleField;
-    this->name = name;
-    this->unitList = new UnitList(size);
-    for (int i = 0; i < size; i++){
-        unitList->insert(unitArray[i]);
+Army::Army() : unitList(nullptr), battleField(nullptr), name(""), LF(0), EXP(0) {}
+Army::Army(Unit **unitArray, int size, string name, BattleField* battlefield)
+    : battleField(battlefield), name(name), unitList(new UnitList(size)), LF(0), EXP(0) {
+    for (int i = 0; i < size; ++i) {
+        Unit* clonedUnit = unitArray[i]->clone();
+        this->unitList->insert(clonedUnit);
     }
-    make();
+    make(); // Thường nên gọi make() sau khi unitList đã được khởi tạo đầy đủ
 }
 void Army :: make(){
     Node* tmp = unitList->get_head();
@@ -338,15 +333,17 @@ void LiberationArmy :: fight(Army *enemy, bool defense) {
             war = false;
             win = false;
         }
+        
         if (win && war){
-            Node* head = enemy->get_unitList()->get_head();
-            while (head != NULL){
-                this->unitList->insert(head->data->clone());
-                head = head->next;
+            Node* head1 = enemy->get_unitList()->get_head();
+            while (head1 != nullptr) {
+                //cout << head1->data->str() << endl;
+                this->unitList->insert(head1->data->clone());
+                head1 = head1->next;
             }
-            enemy->set_EXP(0);
-            enemy->set_LF(0);
-            enemy->get_unitList()->set_head(nullptr);
+            // enemy->set_EXP(0);
+            // enemy->set_LF(0);
+            // enemy->get_unitList()->set_head(nullptr);
             this->make();
         }
         else if (war == false){
@@ -357,6 +354,7 @@ void LiberationArmy :: fight(Army *enemy, bool defense) {
                 tmp = tmp->next;
             }
             this->make();
+            
         }
     }
     else if (defense == true){
@@ -562,7 +560,7 @@ bool UnitList::Unit_exist(Unit *unit){
     return false;
 }
 bool UnitList::insert(Unit *unit){
-    if (this->size_of_list() + 1 > capacity) return false;
+    //if (this->size_of_list() + 1 > capacity) return false;
     if (unit->isInfantry()){
         auto type = unit->getInfantryType();
         if (isContain(type)){
@@ -570,6 +568,7 @@ bool UnitList::insert(Unit *unit){
             while (curr != nullptr) {
                 if (curr->data->isInfantry() && curr->data->getInfantryType() == type) {
                     curr->data->set_quantity(curr->data->get_quantity() + unit->get_quantity());
+                    unit->set_quantity(0);
                     return true;
                 }
                 curr = curr->next;
@@ -744,7 +743,7 @@ double Position :: distance(Position a, Position b){
 TerrainElement :: TerrainElement(){}
 TerrainElement :: ~TerrainElement(){};
 
-void Road :: getEffect(Army *army){}
+void Road :: getEffect(Army *army) {}
 string Road :: str() const{
     return "Road";
 }
@@ -936,54 +935,61 @@ string SpecialZone :: str() const{
     return "SpecialZone";
 }
 // task 3.8
-BattleField :: BattleField(int n_rows, int n_cols, vector<Position *> arrayForest,
-    vector<Position *> arrayRiver, vector<Position *> arrayFortification,
-    vector<Position *> arrayUrban, vector<Position *> arraySpecialZone){
-        this->n_cols = n_cols;
-        this->n_rows = n_rows;
-        terrain = new TerrainElement**[n_rows];
-        for (int i = 0; i < n_rows; i++){
-            terrain[i] = new TerrainElement*[n_cols];
-        }
-        for (Position* x : arrayForest){
-            int r = x->getRow();
-            int c = x->getCol();
-            terrain[r][c] = new Mountain();
-        }
-        for (Position* x : arrayRiver){
-            int r = x->getRow();
-            int c = x->getCol();
-            terrain[r][c] = new River();
-        }
-        for (Position* x : arrayFortification){
-            int r = x->getRow();
-            int c = x->getCol();
-            terrain[r][c] = new Fortification();
-        }
-        for (Position* x : arrayUrban){
-            int r = x->getRow();
-            int c = x->getCol();
-            terrain[r][c] = new Urban();
-        }
-        for (Position* x : arraySpecialZone){
-            int r = x->getRow();
-            int c = x->getCol();
-            terrain[r][c] = new SpecialZone();
+BattleField::BattleField(int n_rows, int n_cols, vector<Position *> arrayForest,
+                       vector<Position *> arrayRiver, vector<Position *> arrayFortification,
+                       vector<Position *> arrayUrban, vector<Position *> arraySpecialZone) {
+    this->n_cols = n_cols;
+    this->n_rows = n_rows;
+    terrain = new TerrainElement**[n_rows];
+    for (int i = 0; i < n_rows; i++) {
+        terrain[i] = new TerrainElement*[n_cols];
+        for (int j = 0; j < n_cols; j++) {
+            terrain[i][j] = nullptr;  // Initialize to nullptr
         }
     }
-BattleField :: ~BattleField(){
-    for (int i = 0; i < n_rows; i++){
-        for (int j = 0; j < n_cols; j++){
-            delete terrain[i][j];
+
+    for (Position* x : arrayForest) {
+        int r = x->getRow();
+        int c = x->getCol();
+        terrain[r][c] = new Mountain();
+    }
+    for (Position* x : arrayRiver) {
+        int r = x->getRow();
+        int c = x->getCol();
+        terrain[r][c] = new River();
+    }
+    for (Position* x : arrayFortification) {
+        int r = x->getRow();
+        int c = x->getCol();
+        terrain[r][c] = new Fortification();
+    }
+    for (Position* x : arrayUrban) {
+        int r = x->getRow();
+        int c = x->getCol();
+        terrain[r][c] = new Urban();
+    }
+    for (Position* x : arraySpecialZone) {
+        int r = x->getRow();
+        int c = x->getCol();
+        terrain[r][c] = new SpecialZone();
+    }
+}
+
+BattleField::~BattleField() {
+    for (int i = 0; i < n_rows; i++) {
+        for (int j = 0; j < n_cols; j++) {
+            if (terrain[i][j] != nullptr) { // Check for nullptr
+                delete terrain[i][j];
+            }
         }
         delete[] terrain[i];
     }
     delete[] terrain;
 }
-string BattleField :: str(){
+
+string BattleField::str() {  // IMPLEMENTATION HERE!
     return "BattleField[n_rows=" + to_string(n_rows) + ",n_cols=" + to_string(n_cols) + "]";
 }
-
 //task 3.9
 Configuration :: Configuration(const string &filepath){
     ifstream in(filepath);

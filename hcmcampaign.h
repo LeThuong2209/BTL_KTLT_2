@@ -187,7 +187,7 @@ class TerrainElement
 {
 public:
     TerrainElement();
-    ~TerrainElement();
+    virtual ~TerrainElement();
     virtual void getEffect(Army *army) = 0;
     virtual Position get_pos() const = 0;
     virtual string str() const = 0;
@@ -195,7 +195,7 @@ public:
 
 class Road : public TerrainElement{
 public: 
-    void getEffect(Army *army);
+    void getEffect(Army *army) override;
     string str() const override;
 };
 
@@ -203,7 +203,7 @@ class Mountain : public TerrainElement{
 private: 
     Position pos;
 public:
-    void getEffect(Army *army);
+    void getEffect(Army *army) override;
     Position get_pos() const override;
     string str() const override;
 };
@@ -212,7 +212,7 @@ class River : public TerrainElement{
 private:
     Position pos;
 public:
-    void getEffect(Army *army);
+    void getEffect(Army *army) override;
     Position get_pos() const override;
     string str() const override;
 };
@@ -221,7 +221,7 @@ class Urban : public TerrainElement{
 private:
     Position pos;
 public:     
-    void getEffect(Army*army);
+    void getEffect(Army*army) override;
     Position get_pos() const override;
     string str() const override;
 };
@@ -230,7 +230,7 @@ class Fortification : public TerrainElement{
 private:
     Position pos;
 public: 
-    void getEffect(Army *army);
+    void getEffect(Army *army) override;
     Position get_pos() const override;
     string str() const override;
 };
@@ -239,7 +239,7 @@ class SpecialZone : public TerrainElement{
 private:
     Position pos;
 public:
-    void getEffect(Army *army);
+    void getEffect(Army *army) override;
     Position get_pos() const override;
     string str() const override;
 };
@@ -298,7 +298,7 @@ private:
 
 public:
     Vehicle(int quantity, int weight, const Position pos, VehicleType vehicleType);
-    virtual int getAttackScore();
+    virtual int getAttackScore() override;
     string str() const override;
     bool isInfantry() const override;
     bool isVehicle() const override;
@@ -314,7 +314,7 @@ private:
 
 public:
     Infantry(int quantity, int weight, const Position pos, InfantryType infantryType);
-    int getAttackScore();
+    int getAttackScore() override;
     string str() const override;
     int sum_digit(int n);
     int getScore(int quantity, int weight);
