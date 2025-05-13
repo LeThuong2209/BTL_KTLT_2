@@ -160,10 +160,8 @@ Unit* Infantry :: clone() const {
 
 // task 3.4
 Army::Army() : unitList(nullptr), battleField(nullptr), name(""), LF(0), EXP(0) {}
-Army::Army(Unit **unitArray, int size, string name, BattleField* battlefield){
-    this->battleField = battleField;
-    this->name = name;
-    this->unitList = new UnitList(size);
+Army::Army(Unit **unitArray, int size, string name, BattleField* battlefield) 
+        : battleField(battlefield), name(name), unitList(new UnitList(size)), LF(0), EXP(0){
     for (int i = 0; i < size; i++){
         Unit* unitClone = unitArray[i]->clone();
         unitList->insert(unitClone);
@@ -950,9 +948,13 @@ BattleField :: BattleField(int n_rows, int n_cols, vector<Position *> arrayFores
         this->n_cols = n_cols;
         this->n_rows = n_rows;
         terrain = new TerrainElement**[n_rows];
-        for (int i = 0; i < n_rows; i++){
+        for (int i = 0; i < n_rows; i++) {
             terrain[i] = new TerrainElement*[n_cols];
+            for (int j = 0; j < n_cols; j++) {
+                terrain[i][j] = nullptr;  // Initialize to nullptr
+            }
         }
+
         for (Position* x : arrayForest){
             int r = x->getRow();
             int c = x->getCol();
@@ -982,11 +984,11 @@ BattleField :: BattleField(int n_rows, int n_cols, vector<Position *> arrayFores
 BattleField :: ~BattleField(){
     for (int i = 0; i < n_rows; i++){
         for (int j = 0; j < n_cols; j++){
-            delete terrain[i][j];
+            if (terrain[i][j]) delete terrain[i][j];
         }
-        delete[] terrain[i];
+        delete [] terrain[i];
     }
-    delete[] terrain;
+    delete []terrain;
 }
 string BattleField :: str(){
     return "BattleField[n_rows=" + to_string(n_rows) + ",n_cols=" + to_string(n_cols) + "]";
