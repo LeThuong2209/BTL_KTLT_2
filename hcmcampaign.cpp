@@ -1,4 +1,5 @@
 #include "hcmcampaign.h"
+#include <string>
 
 // 3.1
 
@@ -1144,10 +1145,10 @@ void cleanupDefeatedUnits(UnitList* unitList) {
         // Remove units if quantity is 0 or less, or if attackScore is 5 or less.
         bool remove_unit = false;
         if (current->data->get_quantity() <= 0) {
-            // std::cout << "  Removing unit (Qty <= 0): " << current->data->str() << std::endl;
+            std::cout << "  Removing unit (Qty <= 0): " << current->data->str() << std::endl;
             remove_unit = true;
         } else if (current->data->getAttackScore() <= 5) {
-             // std::cout << "  Removing unit (attackScore <= 5): " << current->data->str() << std::endl;
+             std::cout << "  Removing unit (attackScore <= 5): " << current->data->str() << std::endl;
              remove_unit = true;
         }
 
@@ -1215,7 +1216,8 @@ void HCMCampaign :: run() {
             std::cout << "Liberation Army phase..." << std::endl;
             liberationArmy->fight(arvn, false); // Call LA's fight method
             arvn->fight(liberationArmy, true); // Call LA's fight method
-
+            cleanupDefeatedUnits(liberationArmy->get_unitList());
+            cleanupDefeatedUnits(arvn->get_unitList());
             liberationArmy->make();
             arvn->make();
   
@@ -1227,7 +1229,8 @@ void HCMCampaign :: run() {
             std::cout << "ARVN phase..." << std::endl;
             arvn->fight(liberationArmy, false); // Call ARVN's fight method
             liberationArmy->fight(arvn, true); // Call LA's fight method
-
+            cleanupDefeatedUnits(liberationArmy->get_unitList());
+            cleanupDefeatedUnits(arvn->get_unitList());
             liberationArmy->make();
             arvn->make();
 
@@ -1235,11 +1238,21 @@ void HCMCampaign :: run() {
             if (liberationArmy->get_unitList()->size_of_list() == 0 || arvn->get_unitList()->size_of_list() == 0) {
                 std::cout << "An army was defeated after ARVN's phase." << std::endl;
             }
+              // int liberationLF = liberationArmy->get_LF();
+              // int liberationAT = liberationArmy->get_unitList()->get_head()->data->getAttackScore();
+              // int liberationEXP = liberationArmy->get_EXP();
+              // int arvnLF = arvn->get_LF();
+              // int arvnAT = arvn->get_unitList()->get_head()->data->getAttackScore();
+              // int arvnEXP = arvn->get_EXP();
+              // cout << "LIBERATIONARMY[" + std::to_string(liberationLF) + "," + std::to_string(liberationEXP) + "]-ARVN[" + std::to_string(arvnLF) + "," + std::to_string(arvnEXP) + "]" << endl;
+              // cout << std::to_string(liberationAT) << endl;
+              // cout << std::to_string(arvnAT) << endl;
 
             // Liberation Army counter-attacks immediately in the same round.
             std::cout << "Liberation Army counter-attack phase..." << std::endl;
             liberationArmy->fight(arvn, false); // Call LA's fight method for counter-attack
-
+            cleanupDefeatedUnits(liberationArmy->get_unitList());
+            cleanupDefeatedUnits(arvn->get_unitList());
             liberationArmy->make();
             arvn->make();
 
