@@ -341,9 +341,9 @@ void LiberationArmy :: fight(Army *enemy, bool defense) {
                 this->unitList->insert(head1->data->clone());
                 head1 = head1->next;
             }
-            // enemy->set_EXP(0);
-            // enemy->set_LF(0);
-            // enemy->get_unitList()->set_head(nullptr);
+            enemy->set_EXP(0);
+            enemy->set_LF(0);
+            enemy->get_unitList()->set_head(nullptr);
             this->make();
         }
         else if (war == false){
@@ -371,6 +371,7 @@ void LiberationArmy :: fight(Army *enemy, bool defense) {
                 head->data->set_quantity(ceil(1.0 * x * 9 / 10));
                 head = head->next;
             }
+            this->make();
         }
         else if (LF < enemy->get_LF() && EXP < enemy->get_EXP()){
             Node *head = unitList->get_head();
@@ -379,6 +380,7 @@ void LiberationArmy :: fight(Army *enemy, bool defense) {
                 head->data->set_quantity(x);
                 head = head->next;
             }
+            this->make();
         }
     }
 }
@@ -512,6 +514,7 @@ void ARVN :: fight(Army *enemy, bool defense){
             }
             head = head->next;
         }
+        this->make();
     }
 }
 string ARVN :: str() const{
@@ -519,7 +522,7 @@ string ARVN :: str() const{
     string EXP = to_string(this->EXP);
     return "ARVN[LF=" + LF + 
            ",EXP=" + EXP + 
-           ",unitList=" + ((this->unitList != nullptr) ? this->unitList->str() : "UnitList[count_vehicle=0;count_infantry=0]") +
+           ",unitList=" + ((this->unitList != nullptr) ?this->unitList->str() : "UnitList[count_vehicle=0;count_infantry=0]") +
            ",battleField=" + ((this->battleField != NULL) ? this->battleField->str() : "]");
 };
 bool ARVN :: isARVN() const{
