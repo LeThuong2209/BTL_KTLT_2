@@ -115,11 +115,11 @@ int Infantry :: getAttackScore(){
     while (tmp >= 10){
         tmp = sum_digit(tmp);
     }
-    if (tmp > 7) this->quantity += ceil(0.2 * quantity);
+    if (tmp > 7) this->quantity = ceil(1.2 * this->quantity);
     else if (tmp < 3) 
     {
-        this->quantity -= ceil(0.1 * quantity);
-        if (quantity < 1) quantity = 1;
+        this->quantity = this->quantity - ceil(0.1 * this->quantity);
+        if (quantity <= 0) quantity = 0;
     }
     return getScore(quantity, weight) + ((infantryType == SPECIALFORCES && check == true) ? 75 : 0);
 }
@@ -162,11 +162,23 @@ Unit* Infantry :: clone() const {
 Army::Army() : unitList(nullptr), battleField(nullptr), name(""), LF(0), EXP(0) {}
 Army::Army(Unit **unitArray, int size, string name, BattleField* battlefield) 
         : battleField(battlefield), name(name), unitList(new UnitList(size)), LF(0), EXP(0){
+    int sum_scoreI = 0, sum_scoreV = 0;
     for (int i = 0; i < size; i++){
-        Unit* unitClone = unitArray[i]->clone();
-        unitList->insert(unitClone);
+        if (unitArray[i]->isInfantry()) sum_scoreI += unitArray[i]->getAttackScore();
+        else sum_scoreV += unitArray[i]->getAttackScore();
     }
-    make();
+    LF = (sum_scoreV > 1000) ? 1000 : sum_scoreV;
+    EXP = (sum_scoreI > 500) ? 500 : sum_scoreI;
+
+    for (int i = 0; i < size; i++){
+        Unit* cloned = unitArray[i]->clone();
+        this->unitList->insert(cloned);
+    }
+    Node* head = unitList->get_head();
+    while (head){
+        head->data->getAttackScore();
+        head = head->next;
+    }
 }
 void Army :: make(){
     if (!unitList || !unitList->get_head()) {
@@ -174,7 +186,7 @@ void Army :: make(){
         EXP = 0;
         return;
     }
-    Node* tmp = unitList->get_head();
+    Node* tmp = this->unitList->get_head();
     int sum_score_I = 0, sum_score_V = 0;
     while (tmp != NULL){
         if (tmp->data->isInfantry()){
@@ -196,11 +208,9 @@ void Army :: make(){
         }
     }
     if (check){
-        if (unitList->get_capacity() > 12) 
         unitList->set_capacity(12);
     }
     else {
-        if (unitList->get_capacity() > 8) 
         unitList->set_capacity(8);
     }
 }
@@ -340,11 +350,15 @@ void LiberationArmy :: fight(Army *enemy, bool defense) {
         
         if (win && war){
             Node* head1 = enemy->get_unitList()->get_head();
+            vector <Unit*> list_reverse;
             while (head1 != nullptr) {
                 //cout << head1->data->str() << endl;
                 Unit* unitClone = head1->data->clone();
-                this->unitList->insert(unitClone);
+                list_reverse.push_back(unitClone);
                 head1 = head1->next;
+            }
+            for (int i = list_reverse.size() - 1; i >= 0; i--){
+                this->unitList->insert(list_reverse[i]);
             }
             enemy->get_unitList()->set_head(nullptr);
             this->make();
@@ -580,6 +594,7 @@ bool UnitList::insert(Unit *unit){
             }
         }
         else {
+            if (this->size_of_list() >= this->get_capacity()) return false;
             if (head == NULL){
                 head = makeNode(unit);
                 return true;
@@ -599,12 +614,14 @@ bool UnitList::insert(Unit *unit){
             while (curr != nullptr) {
                 if (curr->data->isVehicle() && curr->data->getVehicleType() == type) {
                     curr->data->set_quantity(curr->data->get_quantity() + unit->get_quantity());
+                    curr->data->set_weight(max(curr->data->get_weight(), unit->get_weight()));
                     return true;
                 }
                 curr = curr->next;
             }
         }
         else {
+            if (this->size_of_list() >= this->get_capacity()) return false;
             if (head == NULL){
                 head = makeNode(unit);
                 return true;
