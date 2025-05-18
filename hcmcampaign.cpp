@@ -1125,7 +1125,26 @@ Configuration :: Configuration(const string &filepath){
     }
 }
 Configuration :: ~Configuration(){
+    for (Position* x : arrayForest) delete x;
+    arrayForest.clear();
+
+    for (Position* x : arrayRiver) delete x;
+    arrayRiver.clear();
     
+    for (Position* x : arrayFortification) delete x;
+    arrayFortification.clear();
+
+    for (Position* x : arrayUrban) delete x;
+    arrayUrban.clear();
+
+    for (Position* x : arraySpecialZone) delete x;
+    arraySpecialZone.clear();
+
+    for (Unit* x : liberationUnits) delete x;
+    liberationUnits.clear();
+    
+    for (Unit* x : ARVNUnits) delete x;
+    ARVNUnits.clear();
 }
 InfantryType Configuration :: string_to_enumI(string type){
     if (type == "SNIPER") return SNIPER;
