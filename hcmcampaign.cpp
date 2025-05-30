@@ -917,7 +917,7 @@ void Fortification :: getEffect(Army* army){
                     int current_score = head->data->getAttackScore(),
                         new_score = ceil(0.8 * current_score),
                         quantity = head->data->get_quantity(),
-                        new_weight = ceil(1.0 * (new_score * 30- (int)head->data->getInfantryType() * 304) / quantity);
+                        new_weight = ceil(1.0 * (new_score * 30 - (int)head->data->getVehicleType() * 304) / quantity);
                     head->data->set_weight(new_weight);
                 }
             }
